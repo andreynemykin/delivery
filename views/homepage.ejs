@@ -1,0 +1,104 @@
+<div layout="column" ng-controller="ToolbarController">
+  <md-toolbar md-scroll-shrink class="md-primary main-toolbar" layout="column" ng-if="showToolbar">
+    <div layout="row" class="md-toolbar-tools" layout-align="space-between center">
+      <div>
+        <md-icon class="icon-small" md-svg-src="images/icons/logopt.svg"/>
+      </div>
+      <md-button class="md-icon-button" ng-click="toggleMenu()" aria-label="Меню" ng-show="currentUser">
+        <md-icon class="icon-small" md-svg-src="images/icons/menu.svg"></md-icon>
+      </md-button>
+      <md-button ng-if="currentPage.title" class="toolbar-button toolbar-page-title" ng-click="navigate({link: currentPage.link})">
+        {{currentPage.title}}
+      </md-button>
+      <hint ng-show="currentUser"
+            is-toolbar="true"
+            current-page="currentPage"
+            is-hint-visible="isHintVisible">
+      </hint>
+      <md-menu ng-show="currentUser">
+        <md-button class="toolbar-button" ng-click="$mdOpenMenu($event)" aria-label="Ещё" type="button">
+          <md-tooltip hide-xs hide-sm md-direction="left">{{username}}</md-tooltip>
+          {{userFirstName}}
+          <md-icon md-svg-src="images/icons/account-box.svg" md-menu-origin class="icon-small"></md-icon>
+        </md-button>
+        <md-menu-content width="4">
+          <md-menu-item>
+            <md-button class="toolbar-button" ng-click="editProfile()">
+              <md-icon ng-hide="currentUser.isAdmin" md-svg-src="images/icons/account.svg"></md-icon>
+              <md-icon ng-show="currentUser.isAdmin" md-svg-src="images/icons/admin-account.svg"></md-icon>&nbsp;Профиль
+            </md-button>
+          </md-menu-item>
+          <md-menu-item>
+            <md-button class="toolbar-button" ng-click="logout()" aria-label="Выход">
+              <md-icon md-svg-src="images/icons/exit.svg"></md-icon>&nbsp;Выход
+            </md-button>
+          </md-menu-item>
+        </md-menu-content>
+      </md-menu>
+    </div>
+  </md-toolbar>
+  <md-sidenav class="md-primary md-sidenav-left md-whiteframe-z2" md-component-id="menu">
+    <div>
+      <md-toolbar>
+        <h1 class="md-toolbar-tools">
+          <div>
+            <md-icon class="icon-small" md-svg-src="images/icons/logopt.svg"/>
+          </div>
+          <md-button ng-click="toggleMenu()" aria-label="Меню" ng-show="currentUser">
+            <md-icon class="icon-small" md-svg-src="images/icons/menu.svg"></md-icon>
+          </md-button>
+          <a class="text-truncate">Меню</a>
+        </h1>
+        <md-select class="tenant-list"
+                   aria-label="Выбор заказчика"
+                   ng-show="currentUser.isSupport"
+                   ng-model="currentTenant"
+                   ng-class="{deleted: currentUser.tenantIsDeleted}">
+          <md-option class="select-menu"
+                     value="{{tenant}}"
+                     ng-repeat="tenant in tenants"
+                     ng-click="changeTenant(tenant)"
+                     ng-selected="tenant.id == currentUser.currentTenant"
+                     ng-class="{deleted: tenant.isDeleted}">{{tenant.name}}</md-option>
+        </md-select>
+      </md-toolbar>
+      <md-content class="md-content" layout="column">
+        <md-content layout="column" class="menu-wrapper md-content">
+          <md-button ng-click="navigate(menu.defaultPage)"
+                     class="md-primary md-primary-menu-button">
+            <md-icon class="menu-icon" md-svg-src="images/icons/home.svg"></md-icon>
+            На главную
+          </md-button>
+        </md-content>
+        <md-content class="md-content"
+                    layout="column"
+                    ng-repeat="item in menu.menu"
+                    ng-if="!item.hidden && menu.isAccessible(item.requiredRoles)">
+          <md-button ng-if="!item.subMenu"
+                     ng-click="navigate(item)"
+                     class="md-primary md-primary-menu-button"
+                     md-highlight="isPageSelected(item)">
+            <md-icon class="menu-icon" md-svg-src="images/icons/{{item.icon}}"></md-icon>
+            {{item.title}}
+          </md-button>
+          <div ng-if="item.subMenu" sub-menu></div>
+        </md-content>
+      </md-content>
+    </div>
+  </md-sidenav>
+  <div ng-if="!online">
+    <md-progress-linear md-mode="indeterminate"></md-progress-linear>
+    <div class="connection-error">
+      <h1 class="connection-error-text">Не удается подключиться к Интернету</h1>
+      <p>{{errorMessage.NO_INTERNET_CONNECTION}}</p>
+    </div>
+  </div>
+  <md-content ng-if="online" class="md-padding md-content">
+    <div id="main">
+      <hint current-page="currentPage"
+            is-hint-visible="isHintVisible">
+      </hint>
+      <ng-view></ng-view>
+    </div>
+  </md-content>
+</div>
